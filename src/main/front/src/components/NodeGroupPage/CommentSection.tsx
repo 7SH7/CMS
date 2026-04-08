@@ -51,8 +51,8 @@ const CommentSection: React.FC<Props> = ({ nodeId }) => {
   const { mutateAsync: postComment } = usePostComment();
   const loadComments = async () => {
     try {
-      const all = await fetchBe("/v1/comments/search?");
-      const filtered = all.filter((c: Comment) => c.targetId === nodeId);
+      const all = await fetchBe(`/v1/comments/search?nodeGroupId=${nodeId}`);
+      const filtered = Array.isArray(all) ? all.filter((c: Comment) => c.targetId === nodeId) : [];
       setComments(filtered);
     } catch (err) {
       console.error("❌ 댓글 로딩 실패", err);

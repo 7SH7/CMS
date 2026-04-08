@@ -55,7 +55,7 @@ export async function fetchBe(
     const doc = await fetch(serverRootUrl + path, initStuff);
 
     if (doc.status === 401) {
-      localStorage.clear();
+      localStorage.removeItem("auth");
       if (onUnauthorized) {
         onUnauthorized();
       } else {
@@ -74,7 +74,7 @@ export async function fetchBe(
 
       if (path === "/user/get" && !json?.email) {
         alert("유저가 존재하지 않습니다. 로그인을 다시해주세요.");
-        localStorage.clear();
+        localStorage.removeItem("auth");
         window.location.reload();
         throw {
           errorMsg: "유저가 존재하지 않습니다. 로그인을 다시해주세요.",

@@ -26,7 +26,7 @@ export interface CourseNode {
   type: CourseNodeType;
   data: CourseNodeData;
   order: number;
-  isCommentPermitted?: boolean;
+  commentPermitted?: boolean;
 }
 
 export interface CourseNodeGroup {

@@ -1,32 +1,14 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { currentProgram } from "./currentProgram";
 
 // 기준이 되는 mock 날짜: 2025-06-03T12:00:00Z
 const MOCK_NOW = new Date("2025-06-03T12:00:00Z");
 
-// 날짜 문자열을 YYYY-MM-DD HH:mm:ss 형태로 반환
-function formatDate(date: Date) {
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return (
-    date.getFullYear() +
-    "-" +
-    pad(date.getMonth() + 1) +
-    "-" +
-    pad(date.getDate()) +
-    " " +
-    pad(date.getHours()) +
-    ":" +
-    pad(date.getMinutes()) +
-    ":" +
-    pad(date.getSeconds())
-  );
-}
-
-// 상대 날짜 생성
+// ISO 문자열로 날짜 생성 (시간대 문제 방지)
 function daysFromNow(days: number) {
   const d = new Date(MOCK_NOW);
   d.setDate(d.getDate() + days);
-  return formatDate(d);
+  return d.toISOString();
 }
 
 const samplePrograms = [
@@ -51,15 +33,12 @@ const samplePrograms = [
 ];
 
 describe("currentProgram", () => {
-  let dateNowSpy: any;
   beforeAll(() => {
-    // Date.now()를 mock
-    dateNowSpy = vi
-      .spyOn(Date, "now")
-      .mockImplementation(() => MOCK_NOW.getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(MOCK_NOW);
   });
   afterAll(() => {
-    dateNowSpy.mockRestore();
+    vi.useRealTimers();
   });
 
   it("returns only the ongoing program at the mocked current date", () => {

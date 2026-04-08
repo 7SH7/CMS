@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import ReactMarkdown from "react-markdown";
 import { Crepe } from "@milkdown/crepe";
@@ -24,7 +24,10 @@ export interface NodeTextProps {
   ) => Promise<QueryObserverResult<Node, Error>>;
 }
 
-const CrepeEditor: React.FC<{ defaultValue: string }> = ({ defaultValue }) => {
+const CrepeEditor: React.FC<{
+  defaultValue: string;
+  onReady?: (getContent: () => string) => void;
+}> = ({ defaultValue, onReady }) => {
   const { get } = useEditor((root) => {
     return new Crepe({
       root,
@@ -35,35 +38,19 @@ const CrepeEditor: React.FC<{ defaultValue: string }> = ({ defaultValue }) => {
     });
   });
 
+  const [, getInstance] = useInstance();
+
+  useEffect(() => {
+    if (onReady) {
+      onReady(() => {
+        const editor = getInstance();
+        if (!editor) return defaultValue;
+        return editor.action(getMarkdown());
+      });
+    }
+  }, [getInstance, onReady, defaultValue]);
+
   return <Milkdown />;
-};
-
-// ✅ This is the correct way - EditorControls is inside MilkdownProvider
-interface EditorControlsProps {
-  doSave: (content: string) => void;
-  saving: boolean;
-}
-const EditorControls: React.FC<EditorControlsProps> = ({ doSave, saving }) => {
-  const [isLoading, getInstance] = useInstance();
-
-  const handleSave = () => {
-    if (isLoading || saving) return;
-    const editor = getInstance();
-    if (!editor) return;
-    const content = editor;
-    doSave(content.action(getMarkdown()));
-  };
-
-  return (
-    <Button
-      onClick={handleSave}
-      disabled={isLoading || saving}
-      variant="contained"
-      size="small"
-    >
-      {saving ? "저장 중..." : "저장"}
-    </Button>
-  );
 };
 
 const NodeText: React.FC<NodeTextProps> = ({ node, refetch }) => {
@@ -72,14 +59,22 @@ const NodeText: React.FC<NodeTextProps> = ({ node, refetch }) => {
   const fetchBe = useFetchBe();
 
   const [title, setTitle] = useState(node.data?.title || "");
+  const getContentRef = React.useRef<(() => string) | null>(null);
 
   useEffect(() => {
     setTitle(node.data?.title || "");
   }, [node.data?.title]);
 
-  const handleSave = async (content: string) => {
+  const handleEditorReady = useCallback((getContent: () => string) => {
+    getContentRef.current = getContent;
+  }, []);
+
+  const handleSave = async () => {
     setSaving(true);
     try {
+      const content = getContentRef.current
+        ? getContentRef.current()
+        : node.data?.description || "";
       await fetchBe(`/v1/nodes/${node.id}`, {
         method: "PATCH",
         body: {
@@ -101,25 +96,28 @@ const NodeText: React.FC<NodeTextProps> = ({ node, refetch }) => {
     }
   };
 
+  const handleCancel = () => {
+    setTitle(node.data?.title || "");
+    setEditing(false);
+  };
+
   return (
     <Box my={2}>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         {editing ? (
-          <>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              style={{
-                fontWeight: 600,
-                fontSize: 16,
-                padding: 4,
-                minWidth: 180,
-              }}
-              placeholder="제목을 입력하세요"
-              disabled={saving}
-            />
-          </>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            style={{
+              fontWeight: 600,
+              fontSize: 16,
+              padding: 4,
+              minWidth: 180,
+            }}
+            placeholder="제목을 입력하세요"
+            disabled={saving}
+          />
         ) : (
           <>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -139,9 +137,29 @@ const NodeText: React.FC<NodeTextProps> = ({ node, refetch }) => {
       {editing ? (
         <Box>
           <MilkdownProvider>
-            <CrepeEditor defaultValue={node.data?.description || ""} />
-            <EditorControls doSave={handleSave} saving={saving} />
+            <CrepeEditor
+              defaultValue={node.data?.description || ""}
+              onReady={handleEditorReady}
+            />
           </MilkdownProvider>
+          <Box display="flex" gap={1} mt={1}>
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              variant="contained"
+              size="small"
+            >
+              {saving ? "저장 중..." : "저장"}
+            </Button>
+            <Button
+              onClick={handleCancel}
+              disabled={saving}
+              variant="outlined"
+              size="small"
+            >
+              취소
+            </Button>
+          </Box>
         </Box>
       ) : (
         <Box mb={1}>

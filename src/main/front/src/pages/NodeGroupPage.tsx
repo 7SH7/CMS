@@ -39,12 +39,11 @@ const iconMap = {
 };
 
 function NodeGroupPage() {
-  const { nodeGroupUUID } = useParams(); // URL 파라미터에서 UUID 가져오기
-  const [openNodeId, setOpenNodeId] = useState<string | null>(null);
-
-  const { club } = useParams<{
+  const { nodeGroupUUID, club } = useParams<{
+    nodeGroupUUID: string;
     club: string;
   }>();
+  const [openNodeId, setOpenNodeId] = useState<string | null>(null);
 
   const toggleComments = (nodeId: string) => {
     setOpenNodeId((prev) => (prev === nodeId ? null : nodeId));

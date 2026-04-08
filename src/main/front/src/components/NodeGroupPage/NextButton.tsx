@@ -37,8 +37,8 @@ function NextNodeGroupButton({ currentNodeGroupId }: NextNodeGroupButtonProps) {
 
   const handleClick = async () => {
     try {
-      // 먼저 진도 확인
-      fetchBe("/v1/progress/end", {
+      // 진도 완료 기록
+      await fetchBe("/v1/progress/end", {
         method: "POST",
         body: {
           nodeGroupId: currentNodeGroupId,

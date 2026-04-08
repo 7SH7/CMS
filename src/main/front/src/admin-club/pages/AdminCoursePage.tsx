@@ -83,7 +83,7 @@ function AdminCoursePage() {
         </Box>
         <Grid container sx={{ width: "100%" }} spacing={3}>
           <CourseList
-            courses={clubCourses.map((course: any) => ({
+            courses={(clubCourses ?? []).map((course: any) => ({
               ...course,
               url: `/club/${clubSlug}/admin/course/${course.slug}`,
             }))}

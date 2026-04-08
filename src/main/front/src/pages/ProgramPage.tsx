@@ -36,7 +36,7 @@ function ProgramPage() {
     queryFn: () => fetchBe(`/v1/clubs/${club}/programs/${program_name}/users`),
   });
 
-  if (programLoading) {
+  if (programLoading || programProcessLoading) {
     return <Typography>로딩 중...</Typography>;
   }
 
@@ -185,7 +185,7 @@ function ProgramPage() {
             items={calculatedProgramProgress.map((user) => ({
               userId: user.userId,
               name:
-                programProcess.participants.find(
+                programProcess?.participants?.find(
                   (p: any) => p.userId === user.userId
                 )?.participantName || user.userId,
               progress:

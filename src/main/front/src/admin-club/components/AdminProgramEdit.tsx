@@ -103,7 +103,7 @@ const AdminProgramEdit: React.FC<AdminProgramEditProps> = ({
   // courses는 CourseItem[]으로 관리
   const courses = initialCourses?.map((c) =>
     typeof c === "string"
-      ? courseList.find((ac: any) => ac.id === c || ac.title === c) || {
+      ? (courseList ?? []).find((ac: any) => ac.id === c || ac.title === c) || {
           id: c,
           title: c,
           slug: c,

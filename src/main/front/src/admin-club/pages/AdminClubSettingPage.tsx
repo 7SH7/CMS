@@ -148,7 +148,7 @@ function AdminClubSettingPage() {
               width="100%"
             >
               {/* 이미지가 있으면 full width로 보여주고, 수정 버튼 클릭 시 업로드 UI 노출 */}
-              {clubData.bannerUrl ? (
+              {clubData?.bannerUrl ? (
                 <>
                   <Box position="relative" width="100%" maxWidth={480}>
                     <img
@@ -175,7 +175,7 @@ function AdminClubSettingPage() {
                   {showBannerUpload && (
                     <Box mt={2}>
                       <CourseBannerUploadBox
-                        targetId={clubData.id || ""}
+                        targetId={clubData?.id || ""}
                         targetType="club-banner"
                         onComplete={async () => {
                           setShowBannerUpload(false);
@@ -187,7 +187,7 @@ function AdminClubSettingPage() {
                 </>
               ) : (
                 <CourseBannerUploadBox
-                  targetId={clubData.id || ""}
+                  targetId={clubData?.id || ""}
                   targetType="club-banner"
                   onComplete={async () => {
                     refetch();

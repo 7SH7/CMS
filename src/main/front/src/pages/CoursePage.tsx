@@ -69,7 +69,8 @@ function CoursePage() {
       .finally(() => {
         setIsLoadingCourse(false);
       });
-  }, [clubSlug, courseSlug, fetchBe]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clubSlug, courseSlug]);
 
   // 최신 댓글 불러오기
   useEffect(() => {
@@ -100,13 +101,14 @@ function CoursePage() {
       .finally(() => {
         setIsLoadingComments(false);
       });
-  }, [courseData?.id, fetchBe, courseData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseData?.id]);
 
   const isLoading =
     isMyProgramsLoading ||
     isProgramProcessLoading ||
     (isLoadingCourse && !courseData) ||
-    (isLoadingComments && !latestComments);
+    (isLoadingComments && latestComments.length === 0);
 
   if (isLoading) {
     return <CoursePageSkeleton />;
